@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Kauai Escape: An Interactive Itinerary</title>
+    <title>Your Kauai Escape: An Interactive Itinerary (Adapted)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- Chosen Palette: Tropical Serenity -->
-    <!-- Application Structure Plan: The SPA is designed with a top navigation bar and four main, switchable views: 'At a Glance' (dashboard), 'Your Travel DNA' (profile analysis), 'Daily Itinerary' (core plan), and 'Kauai Toolkit' (resources). This tabbed structure was chosen to deconstruct the dense report into user-centric, manageable sections. It prioritizes quick access to the most relevant information for a traveler 'on the go' (e.g., "What's next today?") via the Itinerary view, while keeping foundational analysis ('Travel DNA') and practical resources ('Toolkit') neatly organized and accessible. This non-linear approach enhances usability compared to a long, linear document scroll, allowing users to jump directly to the information they need. -->
+    <!-- Application Structure Plan: The SPA is designed with a top navigation bar and four main, switchable views: 'At a Glance' (dashboard), 'Your Travel DNA' (profile analysis), 'Daily Itinerary' (core plan), and 'Kauai Toolkit' (resources). This tabbed structure was chosen to deconstruct the dense report into user-centric, manageable sections. It prioritizes quick access to the most relevant information for a traveler 'on the go' (e.g., "What's next today?") via the Itinerary view, while keeping foundational analysis ('Travel DNA') and practical resources ('Toolkit') neatly organized and accessible. This non-linear approach enhances usability compared to a long, linear document scroll, allowing users to jump directly to the information they need. This version is adapted for pregnancy, with modified activities and prominent safety notes. -->
     <!-- Visualization & Content Choices: 
         - Traveler Profile: Report Info -> Traveler preferences. Goal -> Inform/Summarize. Viz -> Chart.js Radar Chart & HTML/CSS icon cards. Interaction -> Hover tooltips on chart. Justification -> Visually represents the balance of travel styles in an engaging way. Library -> Chart.js.
-        - Daily Itinerary: Report Info -> Timed daily plans. Goal -> Organize/Inform. Viz -> Vertical timeline with icons. Interaction -> Day-selector buttons update the view. Justification -> Provides a clear, chronological, and scannable view of each day's activities. Library -> Custom HTML/CSS/JS.
-        - Dining: Report Info -> Restaurant list. Goal -> Organize/Compare. Viz -> Filterable card grid. Interaction -> Buttons filter by location/vibe. Justification -> Allows users to find suitable dining options based on their immediate context and preference. Library -> Custom JS.
+        - Daily Itinerary: Report Info -> Timed daily plans. Goal -> Organize/Inform. Viz -> Vertical timeline with icons. Interaction -> Day-selector buttons update the view. Justification -> Provides a clear, chronological, and scannable view of each day's activities. This version removes the boat tour and adds gentler alternatives. Library -> Custom HTML/CSS/JS.
+        - Dining: Report Info -> Restaurant list. Goal -> Organize/Compare. Viz -> Filterable card grid with explicit pregnancy-safety notes. Interaction -> Buttons filter by location/vibe. Justification -> Allows users to find suitable dining options based on their immediate context and preference, with safety as a primary filter. Library -> Custom JS.
         - Driving: Report Info -> Distance table. Goal -> Inform. Viz -> Static, clear table. Interaction -> None. Justification -> Presents critical logistical data in a straightforward, easy-to-read format.
         - Packing: Report Info -> Packing list. Goal -> Inform/Track. Viz -> Interactive checklist. Interaction -> Users can check/uncheck items. Justification -> Adds a useful, practical function to the static list.
     -->
@@ -79,6 +79,16 @@
             height: 350px; 
             max-height: 400px; 
         }
+        .pregnancy-alert {
+            background-color: #FFFBEB; /* Soft Yellow for alerts */
+            border-left: 4px solid #FBBF24; /* Amber border */
+            color: #92400E; /* Dark Amber text */
+        }
+         .food-safety-note {
+            background-color: #FEF2F2; /* Soft Red for food notes */
+            border: 1px solid #FCA5A5; /* Light Red border */
+            color: #B91C1C; /* Dark Red text */
+        }
         @media (min-width: 768px) { 
             .chart-container { 
                 height: 400px; 
@@ -119,9 +129,14 @@
         <main class="flex-grow">
             <!-- At a Glance View -->
             <div id="glance" class="page-content container mx-auto p-4 sm:p-6 lg:p-8 fade-in">
-                 <div class="text-center mb-12">
+                 <div class="text-center mb-8">
                     <h1 class="text-4xl md:text-5xl font-bold text-[#2F4F4F] mb-2">Your Bespoke Kauai Escape</h1>
-                    <p class="text-lg text-gray-600">A tailor-made itinerary for an unforgettable journey.</p>
+                    <p class="text-lg text-gray-600">A pregnancy-adapted itinerary for comfort, safety, and unforgettable memories.</p>
+                </div>
+
+                <div class="pregnancy-alert p-4 rounded-lg mb-8">
+                    <h3 class="font-bold text-lg">A Note on Pregnancy Safety</h3>
+                    <p class="mt-1">This itinerary has been modified for comfort and safety. All activities and recommendations have been reviewed, but please remember to listen to your body, stay hydrated, and consult with your doctor regarding any planned activities or dietary choices. Enjoy your relaxing adventure!</p>
                 </div>
 
                 <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -138,7 +153,7 @@
                             </div>
                            <div class="flex items-start">
                                 <span class="text-[#E5989B] mr-3 mt-1">●</span>
-                                <div><strong class="font-semibold">Travel Style:</strong> A perfect blend of high-impact adventure, cultural immersion, and curated relaxation, built on meticulous planning for a seamless experience.</div>
+                                <div><strong class="font-semibold">Travel Style:</strong> A blend of scenic exploration, cultural immersion, and curated relaxation, adapted for a comfortable and safe experience.</div>
                            </div>
                         </div>
                     </div>
@@ -194,11 +209,11 @@
                         </div>
                         <div class="bg-white p-6 rounded-2xl shadow-lg">
                             <h3 class="text-xl font-bold text-[#2F4F4F] mb-2">⛰️ Activity Preferences</h3>
-                            <p class="text-gray-700">A strong interest in both cultural immersion and active outdoor adventure is clear. We've balanced iconic sights like Waimea Canyon with thrilling experiences like the Na Pali Coast tour.</p>
+                            <p class="text-gray-700">A strong interest in both cultural immersion and active outdoor adventure is clear. We've balanced iconic sights like Waimea Canyon with gentle, scenic exploration.</p>
                         </div>
                         <div class="bg-white p-6 rounded-2xl shadow-lg">
                             <h3 class="text-xl font-bold text-[#2F4F4F] mb-2">🍜 Culinary Explorations</h3>
-                             <p class="text-gray-700">Your palate is diverse and focused on local, authentic cuisine. The plan includes a mix of acclaimed restaurants, casual local gems, and a traditional Luau to satisfy your culinary curiosity.</p>
+                             <p class="text-gray-700">Your palate is diverse and focused on local, authentic cuisine. The plan includes a mix of acclaimed restaurants and casual local gems, with careful attention to pregnancy-safe options.</p>
                         </div>
                     </div>
                 </div>
@@ -222,13 +237,16 @@
             <div id="toolkit" class="page-content container mx-auto p-4 sm:p-6 lg:p-8 hidden fade-in">
                 <div class="text-center mb-12">
                     <h1 class="text-4xl md:text-5xl font-bold text-[#2F4F4F] mb-2">Kauai Toolkit</h1>
-                    <p class="text-lg text-gray-600">Your essential guide for dining, driving, and packing.</p>
+                    <p class="text-lg text-gray-600">Your essential guide for dining, driving, and packing safely and comfortably.</p>
                 </div>
                 <div class="space-y-6">
                     <!-- Dining Section -->
                     <div id="dining-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
-                        <h2 class="text-3xl font-bold text-[#2F4F4F] mb-4">🍽️ Culinary Delights</h2>
-                        <p class="mb-6 text-gray-600">Kauai's dining scene is a vibrant mix of fresh seafood, local flavors, and international influences. Here are curated recommendations based on your preference for authentic, high-quality food. Use the filters to find the perfect spot for any occasion.</p>
+                        <h2 class="text-3xl font-bold text-[#2F4F4F] mb-4">🍽️ Pregnancy-Safe Culinary Delights</h2>
+                        <div class="pregnancy-alert p-4 rounded-lg mb-6">
+                            <h3 class="font-bold text-lg">Important Dining Guidance</h3>
+                            <p class="mt-1">Prioritize thoroughly cooked foods. Avoid raw or undercooked meats, seafood (no poke), and eggs. Avoid unpasteurized dairy and raw sprouts. When in doubt, ask the restaurant staff about ingredients and preparation. Enjoy the amazing flavors of Kauai with peace of mind!</p>
+                        </div>
                         <div id="dining-filters" class="flex flex-wrap gap-2 mb-6">
                              <!-- Filter buttons will be generated here -->
                         </div>
@@ -260,7 +278,7 @@
                     <!-- Packing Section -->
                     <div id="packing-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
                         <h2 class="text-3xl font-bold text-[#2F4F4F] mb-4">🎒 Packing Essentials</h2>
-                        <p class="mb-6 text-gray-600">Being well-prepared is key to a smooth trip. This checklist is based on the planned activities, from hiking in Waimea Canyon to relaxing on Poipu Beach. Check items off as you pack.</p>
+                        <p class="mb-6 text-gray-600">Being well-prepared is key to a smooth trip. This checklist is based on the planned activities, from gentle hikes in Waimea Canyon to relaxing on Poipu Beach. Check items off as you pack.</p>
                         <div id="packing-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
                             <!-- Packing items will be generated here -->
                         </div>
@@ -283,7 +301,7 @@
             const appData = {
                 travelDNA: {
                     labels: ['Adventure', 'Culture', 'Relaxation', 'Culinary', 'Planning', 'Nature'],
-                    data: [90, 80, 70, 85, 95, 90], 
+                    data: [75, 80, 85, 85, 95, 90], // Adjusted Adventure score for comfort
                 },
                 itinerary: [
                     {
@@ -300,23 +318,23 @@
                         date: 'Wed, July 2',
                         title: "Waimea Canyon & South Shore",
                         events: [
-                            { time: '7:30 AM', icon: '⛰️', title: 'Explore Waimea Canyon', description: 'Drive to the "Grand Canyon of the Pacific". Stop at Waimea Canyon, Puu Hinahina, and Kalalau Lookouts. Optional short hike on the Canyon Trail.' },
-                            { time: '12:00 PM', icon: '🍽️', title: 'Lunch near the Canyon', description: 'Enjoy a meal at Koke\'e Lodge or a local spot in Waimea town.' },
-                            { time: '1:30 PM', icon: '🌊', title: 'South Shore Sights', description: 'Return towards Poipu, stopping at the iconic Spouting Horn blowhole.' },
-                            { time: '3:30 PM', icon: '🏖️', title: 'Poipu Beach Relaxation', description: 'Relax on the beach, swim, or snorkel. Keep an eye out for sea turtles and monk seals.' },
-                            { time: '5:30 PM', icon: '🌅', title: 'Sunset & Dinner', description: 'Watch a beautiful sunset from Poipu Beach, followed by dinner at a highly-rated local restaurant like RumFire or Merriman\'s.' },
+                            { time: '8:00 AM', icon: '⛰️', title: 'Explore Waimea Canyon', description: 'Drive to the "Grand Canyon of the Pacific". Stop at Waimea Canyon, Puu Hinahina, and Kalalau Lookouts. A gentle, short stroll on the Iliau Nature Loop is recommended.' },
+                            { time: '12:30 PM', icon: '🍽️', title: 'Lunch near the Canyon', description: 'Enjoy a meal at Koke\'e Lodge or a local spot in Waimea town. Ensure all food is fully cooked.' },
+                            { time: '2:00 PM', icon: '🌊', title: 'South Shore Sights', description: 'Return towards Poipu, stopping at the iconic Spouting Horn blowhole.' },
+                            { time: '3:30 PM', icon: '🏖️', title: 'Poipu Beach Relaxation', description: 'Relax on the beach, swim, or wade in the calm waters. Keep an eye out for sea turtles!' },
+                            { time: '5:30 PM', icon: '🌅', title: 'Sunset & Dinner', description: 'Watch a beautiful sunset from Poipu Beach. For dinner, choose a spot like RumFire and ensure all dishes are fully cooked.' },
                         ]
                     },
                     {
                         day: 2,
                         date: 'Thu, July 3',
-                        title: "Na Pali Adventure & Hanalei",
+                        title: "Na Pali Views & Hanalei Charm",
                         events: [
-                            { time: '6:30 AM', icon: '🛶', title: 'Na Pali Coast Boat Tour', description: 'Early start for an unforgettable raft tour of the dramatic Na Pali Coast. Experience sea caves, waterfalls, and marine life up close. Book in advance!' },
-                            { time: '1:00 PM', icon: '🍽️', title: 'North Shore Lunch', description: 'After the tour, head north and grab lunch at a casual spot in or near Hanalei.' },
-                            { time: '2:30 PM', icon: '🏝️', title: 'Hanalei Bay Exploration', description: 'Discover one of the world\'s most beautiful beaches. Walk the iconic Hanalei Pier and soak in the scenery.' },
-                            { time: '4:30 PM', icon: '💧', title: 'Queen\'s Bath (Optional)', description: 'If conditions are calm, visit this unique tide pool near Princeville. Exercise extreme caution.' },
-                            { time: '6:30 PM', icon: '🌅', title: 'Hanalei Sunset & Dinner', description: 'Witness an incredible sunset over Hanalei Bay, followed by dinner on the North Shore or back in Poipu.' },
+                            { time: '8:30 AM', icon: '🔭', title: 'Na Pali Coast Land Viewpoints', description: 'Drive up to Koke\'e State Park to see the majestic Na Pali Coast from the Kalalau and Puu O Kila Lookouts. A breathtaking view without the boat ride!' },
+                            { time: '1:00 PM', icon: '🍽️', title: 'North Shore Lunch', description: 'After the lookouts, head towards Hanalei for lunch. Choose cooked options and confirm ingredients are pregnancy-safe.' },
+                            { time: '2:30 PM', icon: '🏝️', title: 'Hanalei Bay Exploration', description: 'Discover one of the world\'s most beautiful beaches. Walk the iconic Hanalei Pier and enjoy the serene atmosphere.' },
+                            { time: '4:30 PM', icon: '🏞️', title: 'Princeville Scenery', description: 'Enjoy the scenic drive around Princeville. A visit to Queen\'s Bath is for viewing only – do not enter the water.' },
+                            { time: '6:30 PM', icon: '🌅', title: 'Hanalei Sunset & Dinner', description: 'Witness an incredible sunset over Hanalei Bay, followed by a relaxing dinner.' },
                         ]
                     },
                     {
@@ -324,11 +342,11 @@
                         date: 'Fri, July 4',
                         title: "East Side & Cultural Rhythms",
                         events: [
-                            { time: '8:30 AM', icon: '🚗', title: 'Drive to the East Side', description: 'Head towards the Kapaa area to explore the island\'s "Coconut Coast".' },
-                            { time: '9:30 AM', icon: '🏞️', title: 'Wailua River State Park', description: 'Visit the scenic Opaekaa Falls and consider a boat tour to the Fern Grotto.' },
-                            { time: '12:30 PM', icon: '🚚', title: 'Food Truck Lunch in Kapaa', description: 'Experience Kauai\'s vibrant food truck scene. Try The Musubi Truck or Anattas Thai Food.' },
+                            { time: '9:00 AM', icon: '🚗', title: 'Drive to the East Side', description: 'Head towards the Kapaa area to explore the island\'s "Coconut Coast".' },
+                            { time: '10:00 AM', icon: '🏞️', title: 'Wailua River State Park', description: 'Visit the scenic Opaekaa Falls. A gentle boat tour to the Fern Grotto is a great, relaxing option.' },
+                            { time: '12:30 PM', icon: '🚚', title: 'Food Truck Lunch in Kapaa', description: 'Try The Musubi Truck (cooked options only) or Anattas Thai Food (fully cooked dishes). Ask about ingredients.' },
                             { time: '2:00 PM', icon: '💆', title: 'Afternoon Relaxation', description: 'Return to the resort in Poipu to enjoy the pools, spa, or simply relax on the beach.' },
-                            { time: '5:00 PM', icon: '🌺', title: 'Auli\'i Luau Experience', description: 'Attend the authentic, beachfront luau at the Sheraton. Enjoy a traditional buffet, open bar, and spectacular Polynesian entertainment. Book for July 4th early!' },
+                            { time: '5:00 PM', icon: '🌺', title: 'Auli\'i Luau Experience', description: 'Attend the authentic, beachfront luau at the Sheraton. Stick to thoroughly cooked items from the buffet and enjoy the non-alcoholic drink options.' },
                         ]
                     },
                     {
@@ -336,9 +354,9 @@
                         date: 'Sat, July 5',
                         title: "Poipu Relaxation & Farewell Feast",
                         events: [
-                            { time: '9:00 AM', icon: '🏖️', title: 'Poipu Beach Bliss', description: 'Enjoy a leisurely morning swimming, sunbathing, or snorkeling right at the resort.' },
-                            { time: '11:00 AM', icon: '🚶', title: 'Maha\'ulepu Heritage Trail', description: 'Take a beautiful, easy walk along the stunning coastline for incredible views.' },
-                            { time: '12:30 PM', icon: '🌭', title: 'Casual Poipu Lunch', description: 'Try a unique Puka Dog, fresh poke from Kauai Poke Co., or a local plate lunch.' },
+                            { time: '9:30 AM', icon: '🏖️', title: 'Poipu Beach Bliss', description: 'Enjoy a leisurely morning swimming, sunbathing, or reading by the ocean right at the resort.' },
+                            { time: '11:00 AM', icon: '🚶', title: 'Maha\'ulepu Heritage Trail', description: 'Take a beautiful, gentle walk along the stunning coastline. Listen to your body and go at a comfortable pace.' },
+                            { time: '12:30 PM', icon: '🌭', title: 'Casual Poipu Lunch', description: 'Try a fully cooked Puka Dog or a local plate lunch from Mark\'s Place. Avoid raw poke bowls.' },
                             { time: '2:00 PM', icon: '🛍️', title: 'Resort Leisure or Koloa Town', description: 'Relax by the pool or visit nearby Old Koloa Town for last-minute souvenir shopping.' },
                             { time: '5:30 PM', icon: '🌅', title: 'Final Sunset & Farewell Dinner', description: 'Savor one last Kauai sunset from Poipu Beach, followed by a memorable farewell dinner at Eating House 1849 or RumFire.' },
                         ]
@@ -355,17 +373,17 @@
                     }
                 ],
                 dining: [
-                    { name: "RumFire Poipu Beach", location: "Poipu", vibe: "Upscale", cuisine: "American/Global", notes: "Modern beachfront dining at the Sheraton with great views." },
-                    { name: "Lava's on Poipu Beach", location: "Poipu", vibe: "Casual", cuisine: "Hawaiian", notes: "Casual spot at Sheraton for local favorites and tropical drinks." },
-                    { name: "Merriman's Poipu", location: "Poipu", vibe: "Upscale", cuisine: "Hawaii Regional", notes: "Elegant setting, focuses on locally sourced ingredients." },
-                    { name: "Keoki's Paradise", location: "Poipu", vibe: "Lively", cuisine: "Hawaiian/American", notes: "Tropical ambiance with waterfalls and live entertainment." },
-                    { name: "Eating House 1849", location: "Poipu", vibe: "Upscale", cuisine: "Hawaiian/American", notes: "Pays homage to Hawaii's culinary heritage. By Roy Yamaguchi." },
-                    { name: "Puka Dog", location: "Poipu", vibe: "Casual", cuisine: "Hawaiian Hot Dog", notes: "A must-try unique Hawaiian-style hot dog." },
-                    { name: "Kauai Poke Co.", location: "Poipu", vibe: "Casual", cuisine: "Hawaiian", notes: "Great spot for fresh, delicious, and affordable poke bowls." },
-                    { name: "The Musubi Truck", location: "Kapaa", vibe: "Casual", cuisine: "Hawaiian/Japanese", notes: "Excellent variety of musubi. Perfect for a quick, tasty lunch." },
-                    { name: "Anattas Thai Food", location: "Kapaa", vibe: "Casual", cuisine: "Thai", notes: "Local favorite food truck, rumored to be the best on the island." },
-                    { name: "Mark's Place Kauai", location: "Lihue", vibe: "Casual", cuisine: "Hawaiian", notes: "Famous for their gourmet local-style plate lunches. Near the airport." },
-                    { name: "Kauai Bakery", location: "Lihue", vibe: "Casual", cuisine: "Bakery", notes: "Don't miss the lilikoi (passion fruit) filled malasadas." }
+                    { name: "RumFire Poipu Beach", location: "Poipu", vibe: "Upscale", cuisine: "American/Global", pregnancyNote: "Excellent choice. Ensure all meat and fish are fully cooked." },
+                    { name: "Lava's on Poipu Beach", location: "Poipu", vibe: "Casual", cuisine: "Hawaiian", pregnancyNote: "Good for casual meals. Opt for cooked items like fish tacos or burgers." },
+                    { name: "Merriman's Poipu", location: "Poipu", vibe: "Upscale", cuisine: "Hawaii Regional", pregnancyNote: "Great option. Inform staff and confirm all dishes are fully cooked." },
+                    { name: "Keoki's Paradise", location: "Poipu", vibe: "Lively", cuisine: "Hawaiian/American", pregnancyNote: "Fun atmosphere. Ensure all fish and meat are thoroughly cooked." },
+                    { name: "Eating House 1849", location: "Poipu", vibe: "Upscale", cuisine: "Hawaiian/American", pregnancyNote: "Reliable choice. Confirm all dishes are fully cooked." },
+                    { name: "Puka Dog", location: "Poipu", vibe: "Casual", cuisine: "Hawaiian Hot Dog", pregnancyNote: "A must-try! Ensure hot dog is cooked through." },
+                    { name: "Kauai Poke Co.", location: "Poipu", vibe: "Casual", cuisine: "Hawaiian", pregnancyNote: "AVOID. Primarily serves raw fish (poke), which is not recommended." },
+                    { name: "The Musubi Truck", location: "Kapaa", vibe: "Casual", cuisine: "Hawaiian/Japanese", pregnancyNote: "Choose fully cooked options like kalbi beef or chicken. AVOID seared/raw ahi." },
+                    { name: "Anattas Thai Food", location: "Kapaa", vibe: "Casual", cuisine: "Thai", pregnancyNote: "Good option. Ensure all dishes are fully cooked and request no raw sprouts." },
+                    { name: "Mark's Place Kauai", location: "Lihue", vibe: "Casual", cuisine: "Hawaiian", pregnancyNote: "Excellent safe choice, known for delicious, fully cooked plate lunches." },
+                    { name: "Kauai Bakery", location: "Lihue", vibe: "Casual", cuisine: "Bakery", pregnancyNote: "Perfectly safe for a treat. Don't miss the malasadas!" }
                 ],
                 driving: [
                     { destination: "Lihue Airport (LIH)", time: "~30 minutes", distance: "~15 miles" },
@@ -374,9 +392,9 @@
                     { destination: "Hanalei Bay (North Shore)", time: "~1 hour 17 minutes", distance: "~46 miles" }
                 ],
                 packing: [
-                    { category: "Clothing", items: ["Lightweight clothing", "Layers for evenings", "Rain jacket", "Swimsuits"] },
-                    { category: "Footwear", items: ["Comfortable walking shoes", "Hiking shoes", "Sandals/Flip-flops"] },
-                    { category: "Sun Protection", items: ["Reef-safe sunscreen", "Sunglasses", "Wide-brimmed hat"] },
+                    { category: "Clothing", items: ["Lightweight clothing", "Layers for evenings", "Rain jacket", "Swimsuits", "Comfortable dresses"] },
+                    { category: "Footwear", items: ["Supportive walking shoes", "Stable sandals", "Flip-flops for beach"] },
+                    { category: "Sun & Safety", items: ["Reef-safe sunscreen", "Sunglasses", "Wide-brimmed hat", "Prenatal vitamins"] },
                     { category: "Miscellaneous", items: ["Reusable water bottle", "Bug spray", "Power bank", "Daypack/Beach bag"] }
                 ]
             };
@@ -431,7 +449,7 @@
                         datasets: [{
                             label: 'Your Travel Style',
                             data: appData.travelDNA.data,
-                            backgroundColor: 'rgba(229, 152, 155, 0.4)', // Muted Coral
+                            backgroundColor: 'rgba(229, 152, 155, 0.4)',
                             borderColor: '#E5989B',
                             pointBackgroundColor: '#E5989B',
                             pointBorderColor: '#fff',
@@ -456,11 +474,7 @@
                                 suggestedMax: 100,
                             }
                         },
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
+                        plugins: { legend: { display: false } }
                     }
                 });
             }
@@ -532,15 +546,20 @@
                 gridDiv.innerHTML = '';
                 filteredData.forEach(item => {
                     const card = document.createElement('div');
-                    card.className = 'bg-[#F8F7F2] p-6 rounded-xl shadow-sm space-y-2 fade-in';
+                    card.className = 'bg-[#F8F7F2] p-6 rounded-xl shadow-sm space-y-2 flex flex-col fade-in';
+                    const isAvoid = item.pregnancyNote.toLowerCase().startsWith('avoid');
                     card.innerHTML = `
                         <h3 class="font-bold text-xl text-[#2F4F4F]">${item.name}</h3>
-                        <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
-                           <span><strong>Cuisine:</strong> ${item.cuisine}</span>
-                           <span><strong>Area:</strong> ${item.location}</span>
+                        <div class="flex-grow">
+                            <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
+                               <span><strong>Cuisine:</strong> ${item.cuisine}</span>
+                               <span><strong>Area:</strong> ${item.location}</span>
+                            </div>
+                            <p class="text-gray-700 pt-2">${item.notes || ''}</p>
                         </div>
-                        <p class="text-gray-700 pt-2">${item.notes}</p>
-                        <div class="pt-1"><span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-[#2F4F4F] bg-[#E3D5B8]">${item.vibe}</span></div>
+                        <div class="food-safety-note p-3 rounded-md mt-4 text-sm ${isAvoid ? 'bg-red-100 border-red-500 text-red-800' : 'bg-green-100 border-green-500 text-green-800'}">
+                            <span class="font-bold">Pregnancy Note:</span> ${item.pregnancyNote}
+                        </div>
                     `;
                     gridDiv.appendChild(card);
                 });
@@ -549,7 +568,6 @@
             function setupDiningFilters() {
                 const filtersDiv = document.getElementById('dining-filters');
                 const locations = ['All', ...new Set(appData.dining.map(item => item.location))];
-                const vibes = ['All', ...new Set(appData.dining.map(item => item.vibe))];
                 
                 let currentFilters = {};
 
@@ -561,7 +579,7 @@
                     labelSpan.textContent = `${label}:`;
                     groupContainer.appendChild(labelSpan);
 
-                    items.forEach((item, index) => {
+                    items.forEach((item) => {
                         const button = document.createElement('button');
                         button.textContent = item;
                         button.dataset.filterKey = filterKey;
@@ -574,13 +592,11 @@
                 };
                 
                 createFilterGroup(locations, 'location', 'Location');
-                createFilterGroup(vibes, 'vibe', 'Vibe');
 
                 filtersDiv.addEventListener('click', (e) => {
                     if (e.target.tagName === 'BUTTON') {
                         const { filterKey, filterValue } = e.target.dataset;
                         
-                        // Update active state for the clicked group
                         const siblings = e.target.parentElement.querySelectorAll('button');
                         siblings.forEach(btn => btn.classList.remove('active'));
                         e.target.classList.add('active');
@@ -627,26 +643,37 @@
 
             function renderTodayHighlight() {
                 const highlightDiv = document.getElementById('today-highlight');
-                const today = new Date('2025-07-02T12:00:00'); // Forcing a date for demo purposes
-                const todayDateStr = today.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                const today = new Date(); 
+                const tripStartDate = new Date('2025-07-01T00:00:00');
+                const tripEndDate = new Date('2025-07-06T23:59:59');
+
+                let displayDate;
+                if(today < tripStartDate) {
+                    displayDate = tripStartDate; // Show first day if trip hasn't started
+                } else if (today > tripEndDate) {
+                    displayDate = tripEndDate; // Show last day if trip is over
+                } else {
+                    displayDate = today;
+                }
+
+                const displayDateStr = displayDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
                 
-                const todayData = appData.itinerary.find(d => d.date === todayDateStr);
+                const todayData = appData.itinerary.find(d => d.date === displayDateStr);
                 
                 if (todayData && todayData.events.length > 0) {
                      highlightDiv.innerHTML = `<p class="font-bold text-lg">${todayData.title}</p>
                                               <p class="text-gray-600 mt-1">${todayData.events[0].title}</p>
-                                              <button data-target="itinerary" data-day="${todayData.day}" class="nav-shortcut-button mt-4 text-sm font-semibold text-[#2F4F4F] hover:underline">View Today's Plan &rarr;</button>`;
+                                              <button data-target="itinerary" data-day="${todayData.day}" class="nav-shortcut-button mt-4 text-sm font-semibold text-[#2F4F4F] hover:underline">View Day's Plan &rarr;</button>`;
                     
                     highlightDiv.querySelector('button').addEventListener('click', (e) => {
                         const targetDay = e.currentTarget.dataset.day;
                         showPage('itinerary');
                         
-                        // Update day selector buttons
                         const dayButtons = document.querySelectorAll('#day-selector button');
                         dayButtons.forEach(btn => {
                             btn.classList.remove('active', 'btn-primary');
                             btn.classList.add('btn-secondary');
-                            if(btn.dataset.day === targetDay) {
+                            if(btn.dataset.day == targetDay) {
                                 btn.classList.add('active', 'btn-primary');
                                 btn.classList.remove('btn-secondary');
                             }
@@ -655,7 +682,7 @@
                         renderItinerary(targetDay);
                     });
                 } else {
-                    highlightDiv.innerHTML = `<p>Enjoy your trip!</p>`;
+                    highlightDiv.innerHTML = `<p>Ready for your trip!</p>`;
                 }
             }
 
