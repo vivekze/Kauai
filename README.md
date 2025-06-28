@@ -1,2 +1,0 @@
-# Kauai
-Kauai trip
