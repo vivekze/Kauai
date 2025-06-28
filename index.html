@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Kauai Escape: An Interactive Itinerary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Tropical Serenity -->
+    <!-- Application Structure Plan: The SPA is designed with a top navigation bar and four main, switchable views: 'At a Glance' (dashboard), 'Your Travel DNA' (profile analysis), 'Daily Itinerary' (core plan), and 'Kauai Toolkit' (resources). This tabbed structure was chosen to deconstruct the dense report into user-centric, manageable sections. It prioritizes quick access to the most relevant information for a traveler 'on the go' (e.g., "What's next today?") via the Itinerary view, while keeping foundational analysis ('Travel DNA') and practical resources ('Toolkit') neatly organized and accessible. This non-linear approach enhances usability compared to a long, linear document scroll, allowing users to jump directly to the information they need. -->
+    <!-- Visualization & Content Choices: 
+        - Traveler Profile: Report Info -> Traveler preferences. Goal -> Inform/Summarize. Viz -> Chart.js Radar Chart & HTML/CSS icon cards. Interaction -> Hover tooltips on chart. Justification -> Visually represents the balance of travel styles in an engaging way. Library -> Chart.js.
+        - Daily Itinerary: Report Info -> Timed daily plans. Goal -> Organize/Inform. Viz -> Vertical timeline with icons. Interaction -> Day-selector buttons update the view. Justification -> Provides a clear, chronological, and scannable view of each day's activities. Library -> Custom HTML/CSS/JS.
+        - Dining: Report Info -> Restaurant list. Goal -> Organize/Compare. Viz -> Filterable card grid. Interaction -> Buttons filter by location/vibe. Justification -> Allows users to find suitable dining options based on their immediate context and preference. Library -> Custom JS.
+        - Driving: Report Info -> Distance table. Goal -> Inform. Viz -> Static, clear table. Interaction -> None. Justification -> Presents critical logistical data in a straightforward, easy-to-read format.
+        - Packing: Report Info -> Packing list. Goal -> Inform/Track. Viz -> Interactive checklist. Interaction -> Users can check/uncheck items. Justification -> Adds a useful, practical function to the static list.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F2; /* Warm Neutral: Alabaster */
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .nav-link.active {
+            color: #E5989B; /* Accent: Muted Coral */
+            border-bottom-color: #E5989B;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            top: 1rem;
+            left: -0.8rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background-color: #F8F7F2;
+            border: 3px solid #E3D5B8; /* Secondary: Warm Sand */
+        }
+        .btn-primary {
+            background-color: #2F4F4F; /* Main: Deep Forest Green */
+            color: #F8F7F2;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #4a7c7c;
+        }
+        .btn-secondary {
+            background-color: #E3D5B8;
+            color: #2F4F4F;
+            transition: background-color 0.3s;
+        }
+        .btn-secondary:hover {
+             background-color: #d8c9a8;
+        }
+        .btn-filter.active {
+            background-color: #2F4F4F;
+            color: #F8F7F2;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .chart-container {
+            position: relative; 
+            width: 100%; 
+            max-width: 500px; 
+            margin-left: auto; 
+            margin-right: auto; 
+            height: 350px; 
+            max-height: 400px; 
+        }
+        @media (min-width: 768px) { 
+            .chart-container { 
+                height: 400px; 
+            } 
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+    <div id="app" class="min-h-screen flex flex-col">
+
+        <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+            <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center">
+                        <span class="text-xl font-bold text-[#2F4F4F]">Kauai Escape</span>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a data-target="glance" class="nav-link active text-gray-700 hover:text-[#E5989B] px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">At a Glance</a>
+                            <a data-target="dna" class="nav-link text-gray-700 hover:text-[#E5989B] px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Travel DNA</a>
+                            <a data-target="itinerary" class="nav-link text-gray-700 hover:text-[#E5989B] px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Daily Itinerary</a>
+                            <a data-target="toolkit" class="nav-link text-gray-700 hover:text-[#E5989B] px-3 py-2 rounded-md text-sm font-medium border-b-2 border-transparent">Kauai Toolkit</a>
+                        </div>
+                    </div>
+                    <div class="md:hidden">
+                        <select id="mobile-nav" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <option value="glance">At a Glance</option>
+                            <option value="dna">Travel DNA</option>
+                            <option value="itinerary">Daily Itinerary</option>
+                            <option value="toolkit">Kauai Toolkit</option>
+                        </select>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <main class="flex-grow">
+            <!-- At a Glance View -->
+            <div id="glance" class="page-content container mx-auto p-4 sm:p-6 lg:p-8 fade-in">
+                 <div class="text-center mb-12">
+                    <h1 class="text-4xl md:text-5xl font-bold text-[#2F4F4F] mb-2">Your Bespoke Kauai Escape</h1>
+                    <p class="text-lg text-gray-600">A tailor-made itinerary for an unforgettable journey.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="md:col-span-2">
+                        <h2 class="text-2xl font-bold text-[#2F4F4F] mb-4">Trip Overview</h2>
+                        <div class="space-y-4 text-gray-700">
+                           <div class="flex items-start">
+                                <span class="text-[#E5989B] mr-3 mt-1">●</span>
+                                <div><strong class="font-semibold">Dates:</strong> Tuesday, July 1, 2025 - Sunday, July 6, 2025</div>
+                            </div>
+                            <div class="flex items-start">
+                                <span class="text-[#E5989B] mr-3 mt-1">●</span>
+                                <div><strong class="font-semibold">Accommodation:</strong> Sheraton Kauai Resort Villas, Poipu</div>
+                            </div>
+                           <div class="flex items-start">
+                                <span class="text-[#E5989B] mr-3 mt-1">●</span>
+                                <div><strong class="font-semibold">Travel Style:</strong> A perfect blend of high-impact adventure, cultural immersion, and curated relaxation, built on meticulous planning for a seamless experience.</div>
+                           </div>
+                        </div>
+                    </div>
+                    <div class="bg-[#F8F7F2] rounded-lg p-6">
+                         <h3 class="text-xl font-bold text-[#2F4F4F] mb-4">Today's Highlight</h3>
+                         <div id="today-highlight" class="text-gray-700">
+                             <!-- Dynamic content here -->
+                         </div>
+                    </div>
+                </div>
+
+                <div class="mt-12">
+                    <h2 class="text-2xl font-bold text-center text-[#2F4F4F] mb-6">Explore Your Journey</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <a data-target="dna" class="nav-shortcut-card bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow text-center cursor-pointer">
+                            <div class="text-4xl mb-2">🧬</div>
+                            <h3 class="font-bold text-[#2F4F4F]">Your Travel DNA</h3>
+                        </a>
+                        <a data-target="itinerary" class="nav-shortcut-card bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow text-center cursor-pointer">
+                            <div class="text-4xl mb-2">🗺️</div>
+                            <h3 class="font-bold text-[#2F4F4F]">Daily Itinerary</h3>
+                        </a>
+                        <a data-target="toolkit" data-subtarget="dining" class="nav-shortcut-card bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow text-center cursor-pointer">
+                            <div class="text-4xl mb-2">🍽️</div>
+                            <h3 class="font-bold text-[#2F4F4F]">Dining Guide</h3>
+                        </a>
+                        <a data-target="toolkit" data-subtarget="packing" class="nav-shortcut-card bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow text-center cursor-pointer">
+                           <div class="text-4xl mb-2">🎒</div>
+                            <h3 class="font-bold text-[#2F4F4F]">Packing List</h3>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Travel DNA View -->
+            <div id="dna" class="page-content container mx-auto p-4 sm:p-6 lg:p-8 hidden fade-in">
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl md:text-5xl font-bold text-[#2F4F4F] mb-2">Decoding Your Travel DNA</h1>
+                    <p class="text-lg text-gray-600 max-w-3xl mx-auto">An analysis of your past adventures reveals a distinct travel philosophy. This itinerary is crafted to match your preferences for structure, adventure, and culinary exploration, ensuring a trip that feels uniquely yours.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                         <h2 class="text-2xl font-bold text-center text-[#2F4F4F] mb-4">Your Preference Profile</h2>
+                        <div class="chart-container">
+                            <canvas id="dnaChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                             <h3 class="text-xl font-bold text-[#2F4F4F] mb-2">✈️ Travel Style & Pace</h3>
+                             <p class="text-gray-700">You prefer highly structured, detailed plans and a moderately busy pace with strategic downtime. This itinerary is meticulously organized to maximize experiences while allowing for moments of spontaneous exploration.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                            <h3 class="text-xl font-bold text-[#2F4F4F] mb-2">⛰️ Activity Preferences</h3>
+                            <p class="text-gray-700">A strong interest in both cultural immersion and active outdoor adventure is clear. We've balanced iconic sights like Waimea Canyon with thrilling experiences like the Na Pali Coast tour.</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-lg">
+                            <h3 class="text-xl font-bold text-[#2F4F4F] mb-2">🍜 Culinary Explorations</h3>
+                             <p class="text-gray-700">Your palate is diverse and focused on local, authentic cuisine. The plan includes a mix of acclaimed restaurants, casual local gems, and a traditional Luau to satisfy your culinary curiosity.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Itinerary View -->
+            <div id="itinerary" class="page-content container mx-auto p-4 sm:p-6 lg:p-8 hidden fade-in">
+                <div class="text-center mb-8">
+                    <h1 class="text-4xl md:text-5xl font-bold text-[#2F4F4F] mb-2">Daily Itinerary</h1>
+                    <p class="text-lg text-gray-600">Your day-by-day guide to the Garden Isle. Select a day to see the plan.</p>
+                </div>
+                <div id="day-selector" class="flex flex-wrap justify-center gap-2 mb-8">
+                    <!-- Day buttons will be generated here -->
+                </div>
+                <div id="itinerary-content" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg min-h-[50vh]">
+                     <!-- Itinerary details will be injected here -->
+                </div>
+            </div>
+
+            <!-- Kauai Toolkit View -->
+            <div id="toolkit" class="page-content container mx-auto p-4 sm:p-6 lg:p-8 hidden fade-in">
+                <div class="text-center mb-12">
+                    <h1 class="text-4xl md:text-5xl font-bold text-[#2F4F4F] mb-2">Kauai Toolkit</h1>
+                    <p class="text-lg text-gray-600">Your essential guide for dining, driving, and packing.</p>
+                </div>
+                <div class="space-y-6">
+                    <!-- Dining Section -->
+                    <div id="dining-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                        <h2 class="text-3xl font-bold text-[#2F4F4F] mb-4">🍽️ Culinary Delights</h2>
+                        <p class="mb-6 text-gray-600">Kauai's dining scene is a vibrant mix of fresh seafood, local flavors, and international influences. Here are curated recommendations based on your preference for authentic, high-quality food. Use the filters to find the perfect spot for any occasion.</p>
+                        <div id="dining-filters" class="flex flex-wrap gap-2 mb-6">
+                             <!-- Filter buttons will be generated here -->
+                        </div>
+                        <div id="dining-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                             <!-- Dining cards will be generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Driving Section -->
+                    <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                        <h2 class="text-3xl font-bold text-[#2F4F4F] mb-4">🚗 Navigating Kauai</h2>
+                        <p class="mb-6 text-gray-600">A rental car is the best way to explore the island's diverse landscapes. Below are estimated driving times from your resort in Poipu to key destinations. Remember to account for potential traffic, especially around Lihue and Kapaa during peak hours.</p>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-[#F8F7F2] text-[#2F4F4F] font-bold">
+                                    <tr>
+                                        <th class="p-4 rounded-l-lg">Destination</th>
+                                        <th class="p-4">Est. Driving Time</th>
+                                        <th class="p-4 rounded-r-lg">Approx. Distance</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="driving-table-body">
+                                    <!-- Driving data will be generated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Packing Section -->
+                    <div id="packing-section" class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                        <h2 class="text-3xl font-bold text-[#2F4F4F] mb-4">🎒 Packing Essentials</h2>
+                        <p class="mb-6 text-gray-600">Being well-prepared is key to a smooth trip. This checklist is based on the planned activities, from hiking in Waimea Canyon to relaxing on Poipu Beach. Check items off as you pack.</p>
+                        <div id="packing-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-4">
+                            <!-- Packing items will be generated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="bg-white mt-12">
+            <div class="container mx-auto py-6 px-4 sm:px-6 lg:px-8 text-center text-gray-500">
+                <p>Interactive Itinerary crafted with ❤️ for your Kauai adventure.</p>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const appData = {
+                travelDNA: {
+                    labels: ['Adventure', 'Culture', 'Relaxation', 'Culinary', 'Planning', 'Nature'],
+                    data: [90, 80, 70, 85, 95, 90], 
+                },
+                itinerary: [
+                    {
+                        day: 'Arrival',
+                        date: 'Tue, July 1',
+                        title: "Poipu Welcome & Serenity",
+                        events: [
+                            { time: '9:30 PM+', icon: '✈️', title: 'Arrival at Lihue (LIH)', description: 'Pick up your pre-booked rental car and drive approx. 30 minutes to the resort.' },
+                            { time: '10:30 PM', icon: '🏨', title: 'Check-in at Sheraton Kauai Resort Villas', description: 'Settle in, have a light snack, and get a restful night\'s sleep for the adventures ahead.' }
+                        ]
+                    },
+                    {
+                        day: 1,
+                        date: 'Wed, July 2',
+                        title: "Waimea Canyon & South Shore",
+                        events: [
+                            { time: '7:30 AM', icon: '⛰️', title: 'Explore Waimea Canyon', description: 'Drive to the "Grand Canyon of the Pacific". Stop at Waimea Canyon, Puu Hinahina, and Kalalau Lookouts. Optional short hike on the Canyon Trail.' },
+                            { time: '12:00 PM', icon: '🍽️', title: 'Lunch near the Canyon', description: 'Enjoy a meal at Koke\'e Lodge or a local spot in Waimea town.' },
+                            { time: '1:30 PM', icon: '🌊', title: 'South Shore Sights', description: 'Return towards Poipu, stopping at the iconic Spouting Horn blowhole.' },
+                            { time: '3:30 PM', icon: '🏖️', title: 'Poipu Beach Relaxation', description: 'Relax on the beach, swim, or snorkel. Keep an eye out for sea turtles and monk seals.' },
+                            { time: '5:30 PM', icon: '🌅', title: 'Sunset & Dinner', description: 'Watch a beautiful sunset from Poipu Beach, followed by dinner at a highly-rated local restaurant like RumFire or Merriman\'s.' },
+                        ]
+                    },
+                    {
+                        day: 2,
+                        date: 'Thu, July 3',
+                        title: "Na Pali Adventure & Hanalei",
+                        events: [
+                            { time: '6:30 AM', icon: '🛶', title: 'Na Pali Coast Boat Tour', description: 'Early start for an unforgettable raft tour of the dramatic Na Pali Coast. Experience sea caves, waterfalls, and marine life up close. Book in advance!' },
+                            { time: '1:00 PM', icon: '🍽️', title: 'North Shore Lunch', description: 'After the tour, head north and grab lunch at a casual spot in or near Hanalei.' },
+                            { time: '2:30 PM', icon: '🏝️', title: 'Hanalei Bay Exploration', description: 'Discover one of the world\'s most beautiful beaches. Walk the iconic Hanalei Pier and soak in the scenery.' },
+                            { time: '4:30 PM', icon: '💧', title: 'Queen\'s Bath (Optional)', description: 'If conditions are calm, visit this unique tide pool near Princeville. Exercise extreme caution.' },
+                            { time: '6:30 PM', icon: '🌅', title: 'Hanalei Sunset & Dinner', description: 'Witness an incredible sunset over Hanalei Bay, followed by dinner on the North Shore or back in Poipu.' },
+                        ]
+                    },
+                    {
+                        day: 3,
+                        date: 'Fri, July 4',
+                        title: "East Side & Cultural Rhythms",
+                        events: [
+                            { time: '8:30 AM', icon: '🚗', title: 'Drive to the East Side', description: 'Head towards the Kapaa area to explore the island\'s "Coconut Coast".' },
+                            { time: '9:30 AM', icon: '🏞️', title: 'Wailua River State Park', description: 'Visit the scenic Opaekaa Falls and consider a boat tour to the Fern Grotto.' },
+                            { time: '12:30 PM', icon: '🚚', title: 'Food Truck Lunch in Kapaa', description: 'Experience Kauai\'s vibrant food truck scene. Try The Musubi Truck or Anattas Thai Food.' },
+                            { time: '2:00 PM', icon: '💆', title: 'Afternoon Relaxation', description: 'Return to the resort in Poipu to enjoy the pools, spa, or simply relax on the beach.' },
+                            { time: '5:00 PM', icon: '🌺', title: 'Auli\'i Luau Experience', description: 'Attend the authentic, beachfront luau at the Sheraton. Enjoy a traditional buffet, open bar, and spectacular Polynesian entertainment. Book for July 4th early!' },
+                        ]
+                    },
+                    {
+                        day: 4,
+                        date: 'Sat, July 5',
+                        title: "Poipu Relaxation & Farewell Feast",
+                        events: [
+                            { time: '9:00 AM', icon: '🏖️', title: 'Poipu Beach Bliss', description: 'Enjoy a leisurely morning swimming, sunbathing, or snorkeling right at the resort.' },
+                            { time: '11:00 AM', icon: '🚶', title: 'Maha\'ulepu Heritage Trail', description: 'Take a beautiful, easy walk along the stunning coastline for incredible views.' },
+                            { time: '12:30 PM', icon: '🌭', title: 'Casual Poipu Lunch', description: 'Try a unique Puka Dog, fresh poke from Kauai Poke Co., or a local plate lunch.' },
+                            { time: '2:00 PM', icon: '🛍️', title: 'Resort Leisure or Koloa Town', description: 'Relax by the pool or visit nearby Old Koloa Town for last-minute souvenir shopping.' },
+                            { time: '5:30 PM', icon: '🌅', title: 'Final Sunset & Farewell Dinner', description: 'Savor one last Kauai sunset from Poipu Beach, followed by a memorable farewell dinner at Eating House 1849 or RumFire.' },
+                        ]
+                    },
+                    {
+                        day: 'Departure',
+                        date: 'Sun, July 6',
+                        title: "Last Glimpses of Paradise",
+                        events: [
+                            { time: '7:00 AM', icon: '짐', title: 'Check-out & Drive to Airport', description: 'Early check-out from the resort and drive to Lihue Airport (LIH).' },
+                            { time: '7:30 AM', icon: '🚗', title: 'Rental Car Return', description: 'Allow ample time for car return and airport procedures.' },
+                            { time: '9:00 AM', icon: '✈️', title: 'Depart from Kauai', description: 'Mahalo and a hui hou! (Thank you and until we meet again).' }
+                        ]
+                    }
+                ],
+                dining: [
+                    { name: "RumFire Poipu Beach", location: "Poipu", vibe: "Upscale", cuisine: "American/Global", notes: "Modern beachfront dining at the Sheraton with great views." },
+                    { name: "Lava's on Poipu Beach", location: "Poipu", vibe: "Casual", cuisine: "Hawaiian", notes: "Casual spot at Sheraton for local favorites and tropical drinks." },
+                    { name: "Merriman's Poipu", location: "Poipu", vibe: "Upscale", cuisine: "Hawaii Regional", notes: "Elegant setting, focuses on locally sourced ingredients." },
+                    { name: "Keoki's Paradise", location: "Poipu", vibe: "Lively", cuisine: "Hawaiian/American", notes: "Tropical ambiance with waterfalls and live entertainment." },
+                    { name: "Eating House 1849", location: "Poipu", vibe: "Upscale", cuisine: "Hawaiian/American", notes: "Pays homage to Hawaii's culinary heritage. By Roy Yamaguchi." },
+                    { name: "Puka Dog", location: "Poipu", vibe: "Casual", cuisine: "Hawaiian Hot Dog", notes: "A must-try unique Hawaiian-style hot dog." },
+                    { name: "Kauai Poke Co.", location: "Poipu", vibe: "Casual", cuisine: "Hawaiian", notes: "Great spot for fresh, delicious, and affordable poke bowls." },
+                    { name: "The Musubi Truck", location: "Kapaa", vibe: "Casual", cuisine: "Hawaiian/Japanese", notes: "Excellent variety of musubi. Perfect for a quick, tasty lunch." },
+                    { name: "Anattas Thai Food", location: "Kapaa", vibe: "Casual", cuisine: "Thai", notes: "Local favorite food truck, rumored to be the best on the island." },
+                    { name: "Mark's Place Kauai", location: "Lihue", vibe: "Casual", cuisine: "Hawaiian", notes: "Famous for their gourmet local-style plate lunches. Near the airport." },
+                    { name: "Kauai Bakery", location: "Lihue", vibe: "Casual", cuisine: "Bakery", notes: "Don't miss the lilikoi (passion fruit) filled malasadas." }
+                ],
+                driving: [
+                    { destination: "Lihue Airport (LIH)", time: "~30 minutes", distance: "~15 miles" },
+                    { destination: "Waimea Canyon State Park", time: "~55 minutes", distance: "~28 miles" },
+                    { destination: "Kapaa (East Side)", time: "~36 minutes", distance: "~21 miles" },
+                    { destination: "Hanalei Bay (North Shore)", time: "~1 hour 17 minutes", distance: "~46 miles" }
+                ],
+                packing: [
+                    { category: "Clothing", items: ["Lightweight clothing", "Layers for evenings", "Rain jacket", "Swimsuits"] },
+                    { category: "Footwear", items: ["Comfortable walking shoes", "Hiking shoes", "Sandals/Flip-flops"] },
+                    { category: "Sun Protection", items: ["Reef-safe sunscreen", "Sunglasses", "Wide-brimmed hat"] },
+                    { category: "Miscellaneous", items: ["Reusable water bottle", "Bug spray", "Power bank", "Daypack/Beach bag"] }
+                ]
+            };
+            
+            const pages = document.querySelectorAll('.page-content');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNav = document.getElementById('mobile-nav');
+            const navShortcutCards = document.querySelectorAll('.nav-shortcut-card');
+            
+            function showPage(targetId) {
+                pages.forEach(page => page.classList.add('hidden'));
+                const targetPage = document.getElementById(targetId);
+                if (targetPage) {
+                    targetPage.classList.remove('hidden');
+                    targetPage.classList.add('fade-in');
+                }
+                
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.dataset.target === targetId);
+                });
+                mobileNav.value = targetId;
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => showPage(e.currentTarget.dataset.target));
+            });
+            
+            mobileNav.addEventListener('change', (e) => showPage(e.target.value));
+
+            navShortcutCards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    const target = e.currentTarget.dataset.target;
+                    const subtarget = e.currentTarget.dataset.subtarget;
+                    showPage(target);
+                    if (subtarget) {
+                        setTimeout(() => {
+                           const element = document.getElementById(`${subtarget}-section`);
+                           if (element) {
+                               element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                           }
+                        }, 100);
+                    }
+                });
+            });
+
+            function renderDnaChart() {
+                const ctx = document.getElementById('dnaChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: appData.travelDNA.labels,
+                        datasets: [{
+                            label: 'Your Travel Style',
+                            data: appData.travelDNA.data,
+                            backgroundColor: 'rgba(229, 152, 155, 0.4)', // Muted Coral
+                            borderColor: '#E5989B',
+                            pointBackgroundColor: '#E5989B',
+                            pointBorderColor: '#fff',
+                            pointHoverBackgroundColor: '#fff',
+                            pointHoverBorderColor: '#E5989B'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                angleLines: { color: '#E3D5B8' },
+                                grid: { color: '#E3D5B8' },
+                                pointLabels: { font: { size: 12 }, color: '#2F4F4F' },
+                                ticks: {
+                                    backdropColor: 'transparent',
+                                    color: 'grey',
+                                    stepSize: 20
+                                },
+                                suggestedMin: 0,
+                                suggestedMax: 100,
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            function renderItinerary(day) {
+                const contentDiv = document.getElementById('itinerary-content');
+                const selectedDay = appData.itinerary.find(d => d.day == day || d.date == day);
+                
+                if (!selectedDay) {
+                    contentDiv.innerHTML = '<p>Select a day to see the plan.</p>';
+                    return;
+                }
+
+                let html = `<div class="text-center mb-6">
+                                <h2 class="text-3xl font-bold text-[#2F4F4F]">${selectedDay.title}</h2>
+                                <p class="text-xl text-gray-500">${selectedDay.date}</p>
+                            </div>
+                            <div class="relative border-l-2 border-dashed border-[#E3D5B8] ml-4 pl-8 space-y-8">`;
+
+                selectedDay.events.forEach(event => {
+                    html += `<div class="timeline-item relative">
+                                <div class="absolute -left-[2.8rem] top-2 text-2xl">${event.icon}</div>
+                                <p class="font-bold text-[#E5989B] text-sm">${event.time}</p>
+                                <h3 class="text-xl font-semibold text-[#2F4F4F] mt-1">${event.title}</h3>
+                                <p class="text-gray-600 mt-1">${event.description}</p>
+                            </div>`;
+                });
+
+                html += `</div>`;
+                contentDiv.innerHTML = html;
+                contentDiv.classList.add('fade-in');
+            }
+            
+            function setupDaySelector() {
+                const selectorDiv = document.getElementById('day-selector');
+                appData.itinerary.forEach((item, index) => {
+                    const button = document.createElement('button');
+                    button.textContent = typeof item.day === 'number' ? `Day ${item.day}` : item.day;
+                    button.dataset.day = item.day;
+                    button.className = 'btn-secondary px-4 py-2 rounded-full text-sm font-semibold';
+                    if (index === 1) button.classList.add('active', 'btn-primary');
+                    selectorDiv.appendChild(button);
+                });
+
+                selectorDiv.addEventListener('click', e => {
+                    if (e.target.tagName === 'BUTTON') {
+                        selectorDiv.querySelectorAll('button').forEach(btn => {
+                            btn.classList.remove('active', 'btn-primary');
+                            btn.classList.add('btn-secondary');
+                        });
+                        e.target.classList.add('active', 'btn-primary');
+                        e.target.classList.remove('btn-secondary');
+                        renderItinerary(e.target.dataset.day);
+                    }
+                });
+            }
+
+            function renderDiningGrid(filters = {}) {
+                const gridDiv = document.getElementById('dining-grid');
+                let filteredData = appData.dining;
+
+                if (filters.location) {
+                    filteredData = filteredData.filter(item => item.location === filters.location);
+                }
+                if (filters.vibe) {
+                    filteredData = filteredData.filter(item => item.vibe === filters.vibe);
+                }
+                
+                gridDiv.innerHTML = '';
+                filteredData.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-[#F8F7F2] p-6 rounded-xl shadow-sm space-y-2 fade-in';
+                    card.innerHTML = `
+                        <h3 class="font-bold text-xl text-[#2F4F4F]">${item.name}</h3>
+                        <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-600">
+                           <span><strong>Cuisine:</strong> ${item.cuisine}</span>
+                           <span><strong>Area:</strong> ${item.location}</span>
+                        </div>
+                        <p class="text-gray-700 pt-2">${item.notes}</p>
+                        <div class="pt-1"><span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-[#2F4F4F] bg-[#E3D5B8]">${item.vibe}</span></div>
+                    `;
+                    gridDiv.appendChild(card);
+                });
+            }
+
+            function setupDiningFilters() {
+                const filtersDiv = document.getElementById('dining-filters');
+                const locations = ['All', ...new Set(appData.dining.map(item => item.location))];
+                const vibes = ['All', ...new Set(appData.dining.map(item => item.vibe))];
+                
+                let currentFilters = {};
+
+                const createFilterGroup = (items, filterKey, label) => {
+                    const groupContainer = document.createElement('div');
+                    groupContainer.className = 'flex items-center flex-wrap gap-2';
+                    const labelSpan = document.createElement('span');
+                    labelSpan.className = 'font-semibold mr-2';
+                    labelSpan.textContent = `${label}:`;
+                    groupContainer.appendChild(labelSpan);
+
+                    items.forEach((item, index) => {
+                        const button = document.createElement('button');
+                        button.textContent = item;
+                        button.dataset.filterKey = filterKey;
+                        button.dataset.filterValue = item;
+                        button.className = 'btn-filter px-3 py-1 rounded-full text-sm font-medium border border-gray-300';
+                        if (item === 'All') button.classList.add('active');
+                        groupContainer.appendChild(button);
+                    });
+                    filtersDiv.appendChild(groupContainer);
+                };
+                
+                createFilterGroup(locations, 'location', 'Location');
+                createFilterGroup(vibes, 'vibe', 'Vibe');
+
+                filtersDiv.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON') {
+                        const { filterKey, filterValue } = e.target.dataset;
+                        
+                        // Update active state for the clicked group
+                        const siblings = e.target.parentElement.querySelectorAll('button');
+                        siblings.forEach(btn => btn.classList.remove('active'));
+                        e.target.classList.add('active');
+
+                        if (filterValue === 'All') {
+                            delete currentFilters[filterKey];
+                        } else {
+                            currentFilters[filterKey] = filterValue;
+                        }
+                        renderDiningGrid(currentFilters);
+                    }
+                });
+            }
+
+            function renderDrivingTable() {
+                const tableBody = document.getElementById('driving-table-body');
+                appData.driving.forEach(item => {
+                    const row = tableBody.insertRow();
+                    row.className = "border-b border-gray-200";
+                    row.innerHTML = `<td class="p-4">${item.destination}</td>
+                                     <td class="p-4">${item.time}</td>
+                                     <td class="p-4">${item.distance}</td>`;
+                });
+            }
+            
+            function renderPackingList() {
+                const listDiv = document.getElementById('packing-list');
+                appData.packing.forEach(category => {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.innerHTML = `<h3 class="font-bold text-lg text-[#2F4F4F] mb-2">${category.category}</h3>`;
+                    const itemList = document.createElement('div');
+                    itemList.className = 'space-y-2';
+                    category.items.forEach(item => {
+                        const itemLabel = document.createElement('label');
+                        itemLabel.className = 'flex items-center text-gray-700 cursor-pointer';
+                        itemLabel.innerHTML = `<input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-[#E5989B] focus:ring-[#E5989B] mr-3">
+                                               <span>${item}</span>`;
+                        itemList.appendChild(itemLabel);
+                    });
+                    categoryDiv.appendChild(itemList);
+                    listDiv.appendChild(categoryDiv);
+                });
+            }
+
+            function renderTodayHighlight() {
+                const highlightDiv = document.getElementById('today-highlight');
+                const today = new Date('2025-07-02T12:00:00'); // Forcing a date for demo purposes
+                const todayDateStr = today.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                
+                const todayData = appData.itinerary.find(d => d.date === todayDateStr);
+                
+                if (todayData && todayData.events.length > 0) {
+                     highlightDiv.innerHTML = `<p class="font-bold text-lg">${todayData.title}</p>
+                                              <p class="text-gray-600 mt-1">${todayData.events[0].title}</p>
+                                              <button data-target="itinerary" data-day="${todayData.day}" class="nav-shortcut-button mt-4 text-sm font-semibold text-[#2F4F4F] hover:underline">View Today's Plan &rarr;</button>`;
+                    
+                    highlightDiv.querySelector('button').addEventListener('click', (e) => {
+                        const targetDay = e.currentTarget.dataset.day;
+                        showPage('itinerary');
+                        
+                        // Update day selector buttons
+                        const dayButtons = document.querySelectorAll('#day-selector button');
+                        dayButtons.forEach(btn => {
+                            btn.classList.remove('active', 'btn-primary');
+                            btn.classList.add('btn-secondary');
+                            if(btn.dataset.day === targetDay) {
+                                btn.classList.add('active', 'btn-primary');
+                                btn.classList.remove('btn-secondary');
+                            }
+                        });
+
+                        renderItinerary(targetDay);
+                    });
+                } else {
+                    highlightDiv.innerHTML = `<p>Enjoy your trip!</p>`;
+                }
+            }
+
+
+            // Initial Render
+            showPage('glance');
+            renderDnaChart();
+            setupDaySelector();
+            renderItinerary(1);
+            setupDiningFilters();
+            renderDiningGrid();
+            renderDrivingTable();
+            renderPackingList();
+            renderTodayHighlight();
+        });
+    </script>
+</body>
+</html>
